@@ -6,7 +6,7 @@
 // @author       You
 // @require      https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.18.2/babel.js
 // @require      https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/6.16.0/polyfill.js
-// @match        https://www.wanikani.com/*
+// @match        https://www.wanikani.com/dashboard
 // ==/UserScript==
 
 /* jshint ignore:start */
@@ -83,8 +83,21 @@ var inline_src = (<><![CDATA[
     }
 
     visualize() {
-      let outerContainer = this.getOuterContainer();
-      let innerContainer = document.createElement('div');
+      const outerContainer = this.getOuterContainer();
+      const innerContainer = document.createElement('div');
+      let innerHtmlString = "";
+      this.vocabulary.forEach((word) => {
+        innerHtmlString = innerHtmlString.concat(`
+        <li>
+        <a lang="ja" title="" rel="auto-popover" data-content=
+        "<div class=&quot;progress&quot;><div class=&quot;bar&quot;
+        style=&quot;width: 15%;&quot;>0%</div></div>"
+        href="/kanji/%E4%B8%83" data-original-title="${word.meaning}
+        <br><span lang=&quot;ja&quot;>${word.kanji}</span>">${word.character}</a>
+        </li>
+        `);
+      });
+      outerContainer.innerHTML = innerHtmlString;
     }
   }
 
