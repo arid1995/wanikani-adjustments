@@ -17,7 +17,7 @@ var inline_src = (<><![CDATA[
 
 (function() {
   const BASE_URL = 'https://www.wanikani.com/api/user/4c584e8833a17997674551e4538b7830/';
-  const DESIRED_SRS_LEVEL = 5;
+  const DESIRED_SRS_LEVEL = 4;
 
   class Tamperer {
     constructor() {
@@ -83,21 +83,22 @@ var inline_src = (<><![CDATA[
     }
 
     visualize() {
-      const outerContainer = this.getOuterContainer();
-      const innerContainer = document.createElement('div');
-      let innerHtmlString = "";
-      this.vocabulary.forEach((word) => {
-        innerHtmlString = innerHtmlString.concat(`
-        <li>
-        <a lang="ja" title="" rel="auto-popover" data-content=
-        "<div class=&quot;progress&quot;><div class=&quot;bar&quot;
-        style=&quot;width: 15%;&quot;>0%</div></div>"
-        href="/kanji/%E4%B8%83" data-original-title="${word.meaning}
-        <br><span lang=&quot;ja&quot;>${word.kanji}</span>">${word.character}</a>
-        </li>
-        `);
+        const outerContainer = this.getOuterContainer();
+        const innerContainer = document.createElement('section');
+        innerContainer.setAttribute('class', 'lattice-multi-character');
+
+        let innerHtmlString = '<ul>';
+        this.vocabulary.forEach((word) => {
+          innerHtmlString = innerHtmlString.concat(`
+          <li>
+          <a lang="ja" title="" rel="auto-popover" meaning="${word.meaning}"
+          kana="${word.kana}" style="background-color: blue;">${word.character}</a>
+          </li>
+          `);
+          console.log(word);
+        innerContainer.innerHTML = innerHtmlString + '</ul>';
+        outerContainer.appendChild(innerContainer);
       });
-      outerContainer.innerHTML = innerHtmlString;
     }
   }
 
