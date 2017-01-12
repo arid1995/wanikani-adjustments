@@ -17,36 +17,74 @@ var inline_src = (<><![CDATA[
 
 (function() {
   const BASE_URL = 'https://www.wanikani.com/api/user/4c584e8833a17997674551e4538b7830/';
+  const DESIRED_SRS_LEVEL = 5;
 
   class Tamperer {
     constructor() {
-      this.level = getLevel();
-      this.vocabulary = buildVocab(level);
+      this.vocabulary = [];
+
+      this.getLevel().then((level) => {
+        this.level = level;
+        this.buildVocab(`${this.level-1},${this.level}`).then(() => {
+          this.visualize();
+        });
+      });
     }
 
     getLevel() {
-      return this.sendRequest('GET', 'user-information')
+      return new Promise ((resolve, reject) => {
+        this.sendRequest('GET', 'user-information').then((userInfo) => {
+          const info = JSON.parse(userInfo);
+          resolve(info.user_information.level);
+        })
+        .catch(() => alert('Something has gone south when obtaining level'));
+      });
     }
 
-    getContainer() {
+    getOuterContainer() {
       return document.querySelector('.progression');
     }
 
     buildVocab(level) {
+      return new Promise((resolve, reject) => {
+        this.sendRequest('GET', `vocabulary/${level}`).then((list) => {
+          const vocabList = JSON.parse(list).requested_information;
+          vocabList.forEach((value) => {
+            if (value.user_specific !== null &&
+                  value.user_specific.srs_numeric <= DESIRED_SRS_LEVEL) {
+              let word = {};
+              word.character = value.character;
+              word.kana = value.kana;
+              word.meaning = value.meaning;
+              this.vocabulary.push(word);
+            }
+          });
+          resolve();
+        })
+        .catch(() => alert('Something has gone south when obtaining vocab list'));
+      });
     }
 
     sendRequest(method, relativeURL) {
       return new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequst();
+        const xhr = new XMLHttpRequest();
         xhr.open(method, BASE_URL + relativeURL);
         xhr.send();
-        xhr.onreadystatechange = function() => {
-          if (xhr.readyState == 4 && this.status == 200) {
-            resolve(xhr.responseText);
+        xhr.onreadystatechange = function() {
+          if (xhr.readyState == 4) {
+            if (this.status == 200) {
+              resolve(xhr.responseText);
+            } else {
+              reject();
+            }
           }
-          reject();
-        }
-      })
+        };
+      });
+    }
+
+    visualize() {
+      let outerContainer = this.getOuterContainer();
+      let innerContainer = document.createElement('div');
     }
   }
 
