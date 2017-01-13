@@ -65,7 +65,7 @@ var inline_src = (<><![CDATA[
     buildHTML() {
       this.el.setAttribute('class', 'popover lattice right in');
       this.setStyle(`
-        top: 80px;
+        top: 500px;
         left: 40%;
         display: block;
       `);
@@ -77,13 +77,12 @@ var inline_src = (<><![CDATA[
 
       this.popoverKana = document.createElement('span');
       this.popoverKana.setAttribute('lang', 'ja');
-
+-
       this.popoverInner.appendChild(this.popoverTitle);
-      this.popoverTitle.appendChild(this.popoverKana);
+      this.popoverInner.appendChild(this.popoverKana);
       this.el.appendChild(this.popoverInner);
 
-      const body = document.getElementsByTagName('body')[0];
-      body.appendChild(this.el);
+      this.body = document.getElementsByTagName('body')[0];
     }
 
     setStyle(style) {
@@ -92,16 +91,16 @@ var inline_src = (<><![CDATA[
     }
 
     show() {
-      this.el.setAttribute('hidden', 'false');
+      this.body.appendChild(this.el);
     }
 
     hide() {
-      this.el.setAttribute('hidden', 'true');
+      this.body.removeChild(this.el);
     }
 
     setWord(word) {
       this.popoverKana.innerHTML = word.kana;
-      this.popoverTitle.innerHTML = word.meaning + '<br>' + this.popoverTitle.innerHTML;
+      this.popoverTitle.innerHTML = word.meaning + '<br>';
     }
   }
 
