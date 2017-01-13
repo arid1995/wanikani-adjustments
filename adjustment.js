@@ -19,6 +19,44 @@ var inline_src = (<><![CDATA[
   const BASE_URL = 'https://www.wanikani.com/api/user/4c584e8833a17997674551e4538b7830/';
   const DESIRED_SRS_LEVEL = 4;
 
+  class WordElement {
+    constructor(word) {
+      this.word = word;
+      this.el = document.createElement('a');
+      this.el.setAttribute('lang', 'ja');
+      this.el.setAttribute('rel', 'auto-popover');
+      this.el.setAttribute('href', '#');
+
+      this.el.setAttribute('style', `
+        background-color: #9400ff;
+        font-size: 1.5em;
+      `);
+
+      this.el.innerHTML = word.character;
+      this.wrapper = document.createElement('li');
+      this.wrapper.appendChild(this.el);
+
+      this.el.addEventListener('mouseover', this.showPopUp.bind(this));
+      this.el.addEventListener('mouseleave', this.hidePopUp.bind(this));
+    }
+
+    showPopUp() {
+      this.el.innerHTML = this.word.meaning + ' ' + this.word.kana;
+    }
+
+    hidePopUp() {
+      this.el.innerHTML = this.word.character;
+    }
+
+    attachTo(element) {
+      element.appendChild(this.wrapper);
+    }
+  }
+
+  class PopOverWindow {
+
+  }
+
   class Tamperer {
     constructor() {
       this.vocabulary = [];
@@ -87,18 +125,13 @@ var inline_src = (<><![CDATA[
         const innerContainer = document.createElement('section');
         innerContainer.setAttribute('class', 'lattice-multi-character');
 
-        let innerHtmlString = '<ul>';
+        let list = document.createElement('ul');
         this.vocabulary.forEach((word) => {
-          innerHtmlString = innerHtmlString.concat(`
-          <li>
-          <a lang="ja" title="" rel="auto-popover" meaning="${word.meaning}"
-          kana="${word.kana}" style="background-color: blue;">${word.character}</a>
-          </li>
-          `);
-          console.log(word);
-        innerContainer.innerHTML = innerHtmlString + '</ul>';
-        outerContainer.appendChild(innerContainer);
+          let wordElement = new WordElement(word);
+          wordElement.attachTo(list);
       });
+      innerContainer.appendChild(list);
+      outerContainer.appendChild(innerContainer);
     }
   }
 
