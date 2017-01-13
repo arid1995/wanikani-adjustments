@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         New ES6-Userscript
 // @namespace    http://tampermonkey.net/
-// @version      0.1
+// @version      1.0
 // @description  shows how to use babel compiler
 // @author       You
 // @require      https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.18.2/babel.js
@@ -41,7 +41,7 @@ var inline_src = (<><![CDATA[
     }
 
     getCoordinates() {
-      let coords = { left: 0, top: 0 }
+      let coords = { left: 0, top: 0 };
       coords.left += this.el.offsetLeft;
       coords.top += this.el.offsetTop;
       return coords;
@@ -50,8 +50,8 @@ var inline_src = (<><![CDATA[
     showPopUp() {
       const coords = this.getCoordinates();
       const bBox = this.el.getBoundingClientRect();
-      const width = bBox.right - bBox.left
-      const height = bBox.bottom - bBox.top
+      const width = bBox.right - bBox.left;
+      const height = bBox.bottom - bBox.top;
       popOverWindow.setCoordinates(coords.left + width, coords.top - height);
       popOverWindow.setWord(this.word);
       popOverWindow.show();
@@ -67,7 +67,6 @@ var inline_src = (<><![CDATA[
   }
 
   class PopOverWindow {
-    //`<div class="arrow"></div><div class="popover-inner"><h3 class="popover-title">Seven<br><span lang="ja">しち</span></h3><div class="popover-content"><div class="progress"><div class="bar" style="width: 15%;">0%</div></div></div></div></div>`
     constructor(container) {
       this.el = document.createElement('div');
       this.style = '';
@@ -76,19 +75,42 @@ var inline_src = (<><![CDATA[
     }
 
     buildHTML() {
+      //<div class="popover-content"><div class="progress"><div class="bar" style="width: 15%;">0%</div></div></div></div></div>
       this.el.setAttribute('class', 'popover lattice right in');
       this.popoverInner = document.createElement('div');
       this.popoverInner.setAttribute('class', 'popover-inner');
 
+      let arrow = document.createElement('div');
+      arrow.setAttribute('class', 'arrow');
+      this.popoverInner.appendChild(arrow);
+
       this.popoverTitle = document.createElement('h3');
       this.popoverTitle.setAttribute('class', 'popover-title');
 
+      this.popoverMeaning = document.createElement('span');
+      this.popoverTitle.appendChild(this.popoverMeaning);
+
       this.popoverKana = document.createElement('span');
       this.popoverKana.setAttribute('lang', 'ja');
--
+      this.popoverTitle.appendChild(this.popoverKana);
+
       this.popoverInner.appendChild(this.popoverTitle);
-      this.popoverInner.appendChild(this.popoverKana);
+
+      this.popoverProgress = document.createElement('div');
+      this.popoverProgress.setAttribute('class', 'bar');
+      this.popoverProgress.setAttribute('style', 'width: 80%;');
+      this.popoverProgress.innerHTML = 'Я ЗАЕБАЛСЯ ЭТО ПИСАТЬ'
+
+      let contentContainer = document.createElement('div');
+      contentContainer.setAttribute('class', 'popover-content');
+
+      let progressContainer = document.createElement('div');
+      progressContainer.setAttribute('class', 'progress');
+      progressContainer.appendChild(this.popoverProgress);
+      contentContainer.appendChild(progressContainer);
+
       this.el.appendChild(this.popoverInner);
+      this.el.appendChild(contentContainer);
     }
 
     show() {
@@ -109,7 +131,7 @@ var inline_src = (<><![CDATA[
 
     setWord(word) {
       this.popoverKana.innerHTML = word.kana;
-      this.popoverTitle.innerHTML = word.meaning + '<br>';
+      this.popoverMeaning.innerHTML = word.meaning + '<br>';
     }
   }
 
