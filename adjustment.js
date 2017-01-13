@@ -75,7 +75,6 @@ var inline_src = (<><![CDATA[
     }
 
     buildHTML() {
-      //<div class="popover-content"><div class="progress"><div class="bar" style="width: 15%;">0%</div></div></div></div></div>
       this.el.setAttribute('class', 'popover lattice right in');
       this.popoverInner = document.createElement('div');
       this.popoverInner.setAttribute('class', 'popover-inner');
@@ -219,8 +218,7 @@ var inline_src = (<><![CDATA[
       outerContainer.appendChild(innerContainer);
     }
   }
-
-  //const popOverWindow = new PopOverWindow(document.querySelector('.progression'));
+  
   const popOverWindow = new PopOverWindow(document.getElementsByTagName('body')[0]);
   const tamperer = new Tamperer();
 })();
