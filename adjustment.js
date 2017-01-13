@@ -56,16 +56,18 @@ var inline_src = (<><![CDATA[
 
   class PopOverWindow {
     //`<div class="arrow"></div><div class="popover-inner"><h3 class="popover-title">Seven<br><span lang="ja">しち</span></h3><div class="popover-content"><div class="progress"><div class="bar" style="width: 15%;">0%</div></div></div></div></div>`
-    constructor() {
+    constructor(container) {
       this.el = document.createElement('div');
       this.style = '';
+      this.container = container;
       this.buildHTML();
     }
 
     buildHTML() {
       this.el.setAttribute('class', 'popover lattice right in');
       this.setStyle(`
-        top: 500px;
+        position: relative;
+        top: 0px;
         left: 40%;
         display: block;
       `);
@@ -81,8 +83,6 @@ var inline_src = (<><![CDATA[
       this.popoverInner.appendChild(this.popoverTitle);
       this.popoverInner.appendChild(this.popoverKana);
       this.el.appendChild(this.popoverInner);
-
-      this.body = document.getElementsByTagName('body')[0];
     }
 
     setStyle(style) {
@@ -91,11 +91,11 @@ var inline_src = (<><![CDATA[
     }
 
     show() {
-      this.body.appendChild(this.el);
+      this.container.appendChild(this.el);
     }
 
     hide() {
-      this.body.removeChild(this.el);
+      this.container.removeChild(this.el);
     }
 
     setWord(word) {
@@ -189,7 +189,7 @@ var inline_src = (<><![CDATA[
     }
   }
 
-  const popOverWindow = new PopOverWindow();
+  const popOverWindow = new PopOverWindow(document.querySelector('.progression'));
   const tamperer = new Tamperer();
 })();
 /* jshint ignore:start */
