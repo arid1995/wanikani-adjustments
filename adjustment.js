@@ -40,7 +40,19 @@ var inline_src = (<><![CDATA[
       this.el.addEventListener('mouseleave', this.hidePopUp.bind(this));
     }
 
+    getCoordinates() {
+      let coords = { left: 0, top: 0 }
+      coords.left += this.el.offsetLeft;
+      coords.top += this.el.offsetTop;
+      return coords;
+    }
+
     showPopUp() {
+      const coords = this.getCoordinates();
+      const bBox = this.el.getBoundingClientRect();
+      const width = bBox.right - bBox.left
+      const height = bBox.bottom - bBox.top
+      popOverWindow.setCoordinates(coords.left + width, coords.top - height);
       popOverWindow.setWord(this.word);
       popOverWindow.show();
     }
@@ -65,12 +77,6 @@ var inline_src = (<><![CDATA[
 
     buildHTML() {
       this.el.setAttribute('class', 'popover lattice right in');
-      this.setStyle(`
-        position: relative;
-        top: 0px;
-        left: 40%;
-        display: block;
-      `);
       this.popoverInner = document.createElement('div');
       this.popoverInner.setAttribute('class', 'popover-inner');
 
@@ -85,17 +91,20 @@ var inline_src = (<><![CDATA[
       this.el.appendChild(this.popoverInner);
     }
 
-    setStyle(style) {
-      this.style = style;
-      this.el.setAttribute('style', this.style);
-    }
-
     show() {
       this.container.appendChild(this.el);
     }
 
     hide() {
       this.container.removeChild(this.el);
+    }
+
+    setCoordinates(left, top) {
+      this.el.setAttribute('style', `
+        top: ${top}px;
+        left: ${left}px;
+        display: block;
+      `);
     }
 
     setWord(word) {
@@ -189,7 +198,8 @@ var inline_src = (<><![CDATA[
     }
   }
 
-  const popOverWindow = new PopOverWindow(document.querySelector('.progression'));
+  //const popOverWindow = new PopOverWindow(document.querySelector('.progression'));
+  const popOverWindow = new PopOverWindow(document.getElementsByTagName('body')[0]);
   const tamperer = new Tamperer();
 })();
 /* jshint ignore:start */
