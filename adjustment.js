@@ -41,11 +41,12 @@ var inline_src = (<><![CDATA[
     }
 
     showPopUp() {
-      this.el.innerHTML = this.word.meaning + ' ' + this.word.kana;
+      popOverWindow.setWord(this.word);
+      popOverWindow.show();
     }
 
     hidePopUp() {
-      this.el.innerHTML = this.word.character;
+      popOverWindow.hide();
     }
 
     attachTo(element) {
@@ -54,7 +55,54 @@ var inline_src = (<><![CDATA[
   }
 
   class PopOverWindow {
+    //`<div class="arrow"></div><div class="popover-inner"><h3 class="popover-title">Seven<br><span lang="ja">しち</span></h3><div class="popover-content"><div class="progress"><div class="bar" style="width: 15%;">0%</div></div></div></div></div>`
+    constructor() {
+      this.el = document.createElement('div');
+      this.style = '';
+      this.buildHTML();
+    }
 
+    buildHTML() {
+      this.el.setAttribute('class', 'popover lattice right in');
+      this.setStyle(`
+        top: 80px;
+        left: 40%;
+        display: block;
+      `);
+      this.popoverInner = document.createElement('div');
+      this.popoverInner.setAttribute('class', 'popover-inner');
+
+      this.popoverTitle = document.createElement('h3');
+      this.popoverTitle.setAttribute('class', 'popover-title');
+
+      this.popoverKana = document.createElement('span');
+      this.popoverKana.setAttribute('lang', 'ja');
+
+      this.popoverInner.appendChild(this.popoverTitle);
+      this.popoverTitle.appendChild(this.popoverKana);
+      this.el.appendChild(this.popoverInner);
+
+      const body = document.getElementsByTagName('body')[0];
+      body.appendChild(this.el);
+    }
+
+    setStyle(style) {
+      this.style = style;
+      this.el.setAttribute('style', this.style);
+    }
+
+    show() {
+      this.el.setAttribute('hidden', 'false');
+    }
+
+    hide() {
+      this.el.setAttribute('hidden', 'true');
+    }
+
+    setWord(word) {
+      this.popoverKana.innerHTML = word.kana;
+      this.popoverTitle.innerHTML = word.meaning + '<br>' + this.popoverTitle.innerHTML;
+    }
   }
 
   class Tamperer {
@@ -135,6 +183,7 @@ var inline_src = (<><![CDATA[
     }
   }
 
+  const popOverWindow = new PopOverWindow();
   const tamperer = new Tamperer();
 })();
 /* jshint ignore:start */
