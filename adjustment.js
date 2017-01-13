@@ -170,7 +170,14 @@ var inline_src = (<><![CDATA[
 
     visualize() {
         const outerContainer = this.getOuterContainer();
+        outerContainer.appendChild(document.createElement('hr'));
+
         const innerContainer = document.createElement('section');
+
+        const title = document.createElement('h3');
+        title.innerHTML = `Level ${this.level} vocabulary progression`;
+        innerContainer.appendChild(title);
+
         innerContainer.setAttribute('class', 'lattice-multi-character');
 
         let list = document.createElement('ul');
