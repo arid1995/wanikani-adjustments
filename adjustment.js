@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name         New ES6-Userscript
+// @name         Vocabulary for dashboard
 // @namespace    http://tampermonkey.net/
 // @version      1.0
-// @description  shows how to use babel compiler
-// @author       You
+// @description  Adds vocabulary to the wanikani dashboard
+// @author       Eekone
 // @require      https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.18.2/babel.js
 // @require      https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/6.16.0/polyfill.js
 // @match        https://www.wanikani.com/dashboard
@@ -218,7 +218,7 @@ var inline_src = (<><![CDATA[
       outerContainer.appendChild(innerContainer);
     }
   }
-  
+
   const popOverWindow = new PopOverWindow(document.getElementsByTagName('body')[0]);
   const tamperer = new Tamperer();
 })();
