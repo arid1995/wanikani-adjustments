@@ -25,12 +25,20 @@ var inline_src = (<><![CDATA[
       this.el = document.createElement('a');
       this.el.setAttribute('lang', 'ja');
       this.el.setAttribute('rel', 'auto-popover');
-      this.el.setAttribute('href', '#');
+
+      let encodedString = ""
+      for(let i = 0; i < this.word.character.length; i++) {
+        encodedString += '%' +
+            this.word.character.charCodeAt(i).toString(16).toUpperCase().slice(0, 2) +
+            '%' + this.word.character.charCodeAt(i).toString(16).toUpperCase().slice(2, 4);
+      }
+
+      this.el.setAttribute('href', `/vocabulary/${encodedString}`);
 
       this.el.setAttribute('style', `
         background-color: #9400ff;
-        font-size: 1.5em;
-        padding: 2px;
+        font-size: 1.2em;
+        padding: 1px;
       `);
 
       this.el.innerHTML = word.character;
