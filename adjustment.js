@@ -30,10 +30,12 @@ var inline_src = (<><![CDATA[
       this.el.setAttribute('style', `
         background-color: #9400ff;
         font-size: 1.5em;
+        padding: 2px;
       `);
 
       this.el.innerHTML = word.character;
       this.wrapper = document.createElement('li');
+      this.wrapper.setAttribute('style', 'height: auto;')
       this.wrapper.appendChild(this.el);
 
       this.el.addEventListener('mouseover', this.showPopUp.bind(this));
@@ -204,7 +206,7 @@ var inline_src = (<><![CDATA[
         const innerContainer = document.createElement('section');
 
         const title = document.createElement('h3');
-        title.innerHTML = `Level ${this.level} vocabulary progression`;
+        title.innerHTML = `Level ${this.level} Vocabulary Progression`;
         innerContainer.appendChild(title);
 
         innerContainer.setAttribute('class', 'lattice-multi-character');
