@@ -30,9 +30,10 @@ var inline_src = (<><![CDATA[
 
       let parent = document.createElement('div');
       parent.setAttribute('style', `
-        background-color: rgba(255,255,255,0.5);
+        background-color: rgba(0,95,249,0.8);
         border-radius: 5px;
         height: 28px;
+        z-index: 2;
       `)
       this.upperBar = document.createElement('div');
       this.lowerBar = document.createElement('div');
@@ -90,25 +91,25 @@ var inline_src = (<><![CDATA[
     }
 
     setProgress(barLength = {top: 0, bottom: 0}) {
-      let upperBottomLeftRadius = (barLength.bottom == 0) ? 5 : 0;
-      let upperBottomRightRadius = (barLength.bottom == 50) ? 5 : 0;
-      let lowerTopLeftRadius = (barLength.top == 0) ? 5 : 0;
-      let lowerTopRightRadius = (barLength.top == 50) ? 5 : 0;
+      let upperTopLeftRadius = (barLength.top === 50) ? 0 : 5;
+      let bottomBottomRightRadius = (barLength.bottom === 50) ? 0 : 5;
 
       this.upperBar.setAttribute('style', `
-        border-radius: 5px 5px ${upperBottomRightRadius}px ${upperBottomLeftRadius}px;
+        background-color: rgba(255,255,255,1);
+        border-radius: 5px ${upperTopLeftRadius}px 0px 0px;
         top: 0px;
         width: ${barLength.top}%;
         height: 50%;
-        background-color: rgba(0,95,249,0.8);
+        z-index: 3;
       `);
 
       this.lowerBar.setAttribute('style', `
-        border-radius: ${lowerTopLeftRadius}px ${lowerTopRightRadius}px 5px 5px;
+        background-color: rgba(255,255,255,1);
+        border-radius: 0px 0px ${bottomBottomRightRadius}px 5px;
         top: 50%;
         width: ${barLength.bottom}%;
         height: 50%;
-        background-color: rgba(0,95,249,0.8);
+        z-index: 3;
       `);
     }
 
