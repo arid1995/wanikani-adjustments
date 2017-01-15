@@ -25,22 +25,86 @@ var inline_src = (<><![CDATA[
       this.el = document.createElement('a');
       this.el.setAttribute('lang', 'ja');
       this.el.setAttribute('rel', 'auto-popover');
-      
+
       this.el.setAttribute('href', `/vocabulary/${this.word.character}`);
 
+      let parent = document.createElement('div');
+      parent.setAttribute('style', `
+        background-color: rgba(255,255,255,0.5);
+        border-radius: 3px;
+        height: 28px;
+      `)
+      this.upperBar = document.createElement('div');
+      this.lowerBar = document.createElement('div');
+
+      parent.appendChild(this.el);
+      parent.appendChild(this.upperBar);
+      parent.appendChild(this.lowerBar);
+
+      this.determineProgressBarLength();
+
+      this.setProgress(this.progressBarLength);
+
       this.el.setAttribute('style', `
+        position: relative;
+        float: left;
+        margin: 3px;
         background-color: #9400ff;
         font-size: 1.2em;
         padding: 1px;
+        z-index: 2;
       `);
 
       this.el.innerHTML = word.character;
       this.wrapper = document.createElement('li');
-      this.wrapper.setAttribute('style', 'height: auto;')
-      this.wrapper.appendChild(this.el);
+      this.wrapper.setAttribute('style', 'height: auto;');
+      this.wrapper.appendChild(parent);
 
       this.el.addEventListener('mouseover', this.showPopUp.bind(this));
       this.el.addEventListener('mouseleave', this.hidePopUp.bind(this));
+    }
+
+    determineProgressBarLength() {
+      this.progressBarLength = {top: 0, bottom: 0};
+      switch (this.word.level) {
+        case 1:
+          this.progressBarLength.top = 50;
+          this.progressBarLength.bottom = 0;
+          break;
+        case 2:
+          this.progressBarLength.top = 50;
+          this.progressBarLength.bottom = 50;
+          break;
+        case 3:
+          this.progressBarLength.top = 50;
+          this.progressBarLength.bottom = 100;
+          break;
+        case 4:
+          this.progressBarLength.top = 100;
+          this.progressBarLength.bottom = 100;
+          break;
+        default:
+          this.progressBarLength.top = 100;
+          this.progressBarLength.bottom = 100;
+      }
+    }
+
+    setProgress(barLength = {top: 0, bottom: 0}) {
+      this.upperBar.setAttribute('style', `
+        border-radius: 5px 5px 0 0;
+        top: 0px;
+        width: ${barLength.top}%;
+        height: 50%;
+        background-color: rgba(0,95,249,0.8);
+      `);
+
+      this.lowerBar.setAttribute('style', `
+        border-radius: 0 0 5px 5px;
+        top: 50%;
+        width: ${barLength.bottom}%;
+        height: 50%;
+        background-color: rgba(0,95,249,0.8);
+      `);
     }
 
     getCoordinates() {
@@ -101,7 +165,7 @@ var inline_src = (<><![CDATA[
       this.popoverProgress = document.createElement('div');
       this.popoverProgress.setAttribute('class', 'bar');
       this.popoverProgress.setAttribute('style', 'width: 80%;');
-      this.popoverProgress.innerHTML = 'Я ЗАЕБАЛСЯ ЭТО ПИСАТЬ'
+      this.popoverProgress.innerHTML = 'useless info';
 
       let contentContainer = document.createElement('div');
       contentContainer.setAttribute('class', 'popover-content');
@@ -174,6 +238,7 @@ var inline_src = (<><![CDATA[
               word.character = value.character;
               word.kana = value.kana;
               word.meaning = value.meaning;
+              word.level = value.user_specific.srs_numeric;
               this.vocabulary.push(word);
             }
           });
