@@ -34,7 +34,7 @@ var inline_src = (<><![CDATA[
         border-radius: 5px;
         height: 28px;
         z-index: 2;
-      `)
+      `);
       this.upperBar = document.createElement('div');
       this.lowerBar = document.createElement('div');
 
@@ -48,7 +48,7 @@ var inline_src = (<><![CDATA[
 
       let radius = `0px ${(this.progressBarLength.top == 100) ? 0 : 5}px
       ${(this.progressBarLength.bottom == 100) ? 0 : 5}px
-      ${(this.progressBarLength.bottom > 0) ? 0 : 5}px`
+      ${(this.progressBarLength.bottom > 0) ? 0 : 5}px`;
 
       this.el.setAttribute('style', `
         position: relative;
@@ -291,6 +291,13 @@ var inline_src = (<><![CDATA[
         innerContainer.setAttribute('class', 'lattice-multi-character');
 
         let list = document.createElement('ul');
+        list.setAttribute('style', `
+          display: flex;
+          justify-content: space-around;
+          flex-flow: row wrap;
+        `);
+
+
         this.vocabulary.forEach((word) => {
           let wordElement = new WordElement(word);
           wordElement.attachTo(list);
