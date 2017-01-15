@@ -30,7 +30,7 @@ var inline_src = (<><![CDATA[
 
       let parent = document.createElement('div');
       parent.setAttribute('style', `
-        background-color: rgba(0,95,249,0.8);
+        background-color: rgba(148, 0, 255, 0.4);
         border-radius: 5px;
         height: 28px;
         z-index: 2;
@@ -46,14 +46,21 @@ var inline_src = (<><![CDATA[
 
       this.setProgress(this.progressBarLength);
 
+      let radius = `0px ${(this.progressBarLength.top == 100) ? 0 : 5}px
+      ${(this.progressBarLength.bottom == 100) ? 0 : 5}px
+      ${(this.progressBarLength.bottom > 0) ? 0 : 5}px`
+
       this.el.setAttribute('style', `
         position: relative;
         float: left;
         margin: 3px;
         background-color: #9400ff;
+        border-radius: ${radius};
         font-size: 1.2em;
         padding: 1px;
         z-index: 2;
+        box-shadow: 0 0 0 0;
+        -webkit-box-shadow: 0 0 0 0;
       `);
 
       this.el.innerHTML = word.character;
@@ -95,21 +102,21 @@ var inline_src = (<><![CDATA[
       let bottomBottomRightRadius = (barLength.bottom === 50) ? 0 : 5;
 
       this.upperBar.setAttribute('style', `
-        background-color: rgba(255,255,255,1);
+        background-color: #9400ff;
         border-radius: 5px ${upperTopLeftRadius}px 0px 0px;
         top: 0px;
         width: ${barLength.top}%;
         height: 50%;
-        z-index: 3;
+        z-index: 1;
       `);
 
       this.lowerBar.setAttribute('style', `
-        background-color: rgba(255,255,255,1);
+        background-color: #9400ff;
         border-radius: 0px 0px ${bottomBottomRightRadius}px 5px;
         top: 50%;
         width: ${barLength.bottom}%;
         height: 50%;
-        z-index: 3;
+        z-index: 1;
       `);
     }
 
