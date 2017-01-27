@@ -26,7 +26,9 @@ var inline_src = (<><![CDATA[
       this.el.setAttribute('lang', 'ja');
       this.el.setAttribute('rel', 'auto-popover');
 
-      this.el.setAttribute('href', `/vocabulary/${this.word.character}`);
+      if (!Number.isInteger(this.word.character)) {
+        this.el.setAttribute('href', `/vocabulary/${this.word.character}`);
+      }
 
       let parent = document.createElement('div');
       parent.setAttribute('style', `
@@ -72,6 +74,7 @@ var inline_src = (<><![CDATA[
       this.wrapper.setAttribute('style', 'height: auto;');
       this.wrapper.appendChild(parent);
 
+      if (Number.isInteger(this.word.character)) return;
       this.el.addEventListener('mouseover', this.showPopUp.bind(this));
       this.el.addEventListener('mouseleave', this.hidePopUp.bind(this));
     }
@@ -277,8 +280,6 @@ var inline_src = (<><![CDATA[
                     previousWord === null) {
                 let marker = {};
                 marker.character = word.level;
-                marker.kana = word.level;
-                marker.meaning = word.level;
                 marker.color = 'blue';
                 marker.highlight = 0;
                 this.vocabulary.push(marker);
