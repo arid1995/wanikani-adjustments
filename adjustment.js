@@ -54,7 +54,7 @@ var inline_src = (<><![CDATA[
         position: relative;
         float: left;
         margin: 3px;
-        background-color: #9400ff;
+        background-color: ${this.word.color};
         border-radius: ${radius};
         font-size: 1.2em;
         padding: 1px;
@@ -74,7 +74,7 @@ var inline_src = (<><![CDATA[
 
     determineProgressBarLength() {
       this.progressBarLength = {top: 0, bottom: 0};
-      switch (this.word.level) {
+      switch (this.word.srsLevel) {
         case 1:
           this.progressBarLength.top = 50;
           this.progressBarLength.bottom = 0;
@@ -102,7 +102,7 @@ var inline_src = (<><![CDATA[
       let bottomBottomRightRadius = (barLength.bottom === 50) ? 0 : 5;
 
       this.upperBar.setAttribute('style', `
-        background-color: #9400ff;
+        background-color: ${this.word.color};
         border-radius: 5px ${upperTopLeftRadius}px 0px 0px;
         top: 0px;
         width: ${barLength.top}%;
@@ -111,7 +111,7 @@ var inline_src = (<><![CDATA[
       `);
 
       this.lowerBar.setAttribute('style', `
-        background-color: #9400ff;
+        background-color: ${this.word.color};
         border-radius: 0px 0px ${bottomBottomRightRadius}px 5px;
         top: 50%;
         width: ${barLength.bottom}%;
@@ -244,6 +244,9 @@ var inline_src = (<><![CDATA[
       return new Promise((resolve, reject) => {
         this.sendRequest('GET', `vocabulary/${level}`).then((list) => {
           const vocabList = JSON.parse(list).requested_information;
+          let previousWord = null;
+          vocabList.sort((left, right) => {return left.level < right.level;});
+
           vocabList.forEach((value) => {
             if (value.user_specific !== null &&
                   value.user_specific.srs_numeric <= DESIRED_SRS_LEVEL) {
@@ -251,8 +254,22 @@ var inline_src = (<><![CDATA[
               word.character = value.character;
               word.kana = value.kana;
               word.meaning = value.meaning;
-              word.level = value.user_specific.srs_numeric;
+              word.level = value.level;
+              word.srsLevel = value.user_specific.srs_numeric;
+              word.color = '#9400ff';
+
+              if ((previousWord !== null && (previousWord.level !== word.level)) ||
+                    previousWord === null) {
+                let marker = {};
+                marker.character = word.level;
+                marker.kana = word.level;
+                marker.meaning = word.level;
+                marker.color = 'blue';
+                this.vocabulary.push(marker);
+              }
+
               this.vocabulary.push(word);
+              previousWord = word;
             }
           });
           resolve();
