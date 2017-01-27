@@ -49,7 +49,7 @@ var inline_src = (<><![CDATA[
 
       this.setProgress(this.progressBarLength);
 
-      let radius = `${(this.progressBarLength.top === 100) ? 5 : 0}px
+      let radius = `${(this.progressBarLength.top === 0) ? 5 : 0}px
       ${(this.progressBarLength.top === 100) ? 0 : 5}px
       ${(this.progressBarLength.bottom === 100) ? 0 : 5}px
       ${(this.progressBarLength.bottom > 0) ? 0 : 5}px`;
@@ -136,9 +136,8 @@ var inline_src = (<><![CDATA[
       const bBox = this.el.getBoundingClientRect();
       const width = bBox.right - bBox.left;
       const height = bBox.bottom - bBox.top;
-      popOverWindow.setCoordinates(coords.left + width, coords.top - height);
+      popOverWindow.setCoordinatesAndShow(coords.left, coords.top - height, width);
       popOverWindow.setWord(this.word);
-      popOverWindow.show();
     }
 
     hidePopUp() {
@@ -204,10 +203,21 @@ var inline_src = (<><![CDATA[
       this.container.removeChild(this.el);
     }
 
-    setCoordinates(left, top) {
+    setCoordinatesAndShow(left, top, elementWidth) {
+      this.container.appendChild(this.el);
+      this.width = this.el.getBoundingClientRect().right - this.el.getBoundingClientRect().left;
+
+      if (left + this.width > window.innerWidth * 0.95) {
+        this.left = left - this.width;
+        this.el.setAttribute('class', 'popover lattice left in');
+      } else {
+        this.left = left + elementWidth
+        this.el.setAttribute('class', 'popover lattice right in');
+      }
+
       this.el.setAttribute('style', `
         top: ${top}px;
-        left: ${left}px;
+        left: ${this.left}px;
         display: block;
       `);
     }
