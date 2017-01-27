@@ -49,8 +49,9 @@ var inline_src = (<><![CDATA[
 
       this.setProgress(this.progressBarLength);
 
-      let radius = `0px ${(this.progressBarLength.top == 100) ? 0 : 5}px
-      ${(this.progressBarLength.bottom == 100) ? 0 : 5}px
+      let radius = `${(this.progressBarLength.top === 100) ? 5 : 0}px
+      ${(this.progressBarLength.top === 100) ? 0 : 5}px
+      ${(this.progressBarLength.bottom === 100) ? 0 : 5}px
       ${(this.progressBarLength.bottom > 0) ? 0 : 5}px`;
 
       this.el.setAttribute('style', `
