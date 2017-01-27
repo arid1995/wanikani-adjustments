@@ -32,6 +32,9 @@ var inline_src = (<><![CDATA[
       parent.setAttribute('style', `
         background-color: rgba(148, 0, 255, 0.4);
         border-radius: 5px;
+        border-width: ${this.word.highlight}px;
+        border-color: red;
+        border-style: solid;
         height: 28px;
         z-index: 2;
       `);
@@ -75,7 +78,11 @@ var inline_src = (<><![CDATA[
     determineProgressBarLength() {
       this.progressBarLength = {top: 0, bottom: 0};
       switch (this.word.srsLevel) {
-        case 1:
+        case 4:
+          this.progressBarLength.top = 0;
+          this.progressBarLength.bottom = 0;
+          break;
+        case 3:
           this.progressBarLength.top = 50;
           this.progressBarLength.bottom = 0;
           break;
@@ -83,12 +90,8 @@ var inline_src = (<><![CDATA[
           this.progressBarLength.top = 50;
           this.progressBarLength.bottom = 50;
           break;
-        case 3:
+        case 1:
           this.progressBarLength.top = 50;
-          this.progressBarLength.bottom = 100;
-          break;
-        case 4:
-          this.progressBarLength.top = 100;
           this.progressBarLength.bottom = 100;
           break;
         default:
@@ -257,6 +260,7 @@ var inline_src = (<><![CDATA[
               word.level = value.level;
               word.srsLevel = value.user_specific.srs_numeric;
               word.color = '#9400ff';
+              word.highlight = (word.srsLevel > 1) ? 0 : 1;
 
               if ((previousWord !== null && (previousWord.level !== word.level)) ||
                     previousWord === null) {
@@ -265,6 +269,7 @@ var inline_src = (<><![CDATA[
                 marker.kana = word.level;
                 marker.meaning = word.level;
                 marker.color = 'blue';
+                marker.highlight = 0;
                 this.vocabulary.push(marker);
               }
 
