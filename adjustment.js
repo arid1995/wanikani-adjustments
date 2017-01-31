@@ -17,7 +17,7 @@ var inline_src = (<><![CDATA[
 
 (function() {
   const BASE_URL = 'https://www.wanikani.com/api/user/4c584e8833a17997674551e4538b7830/';
-  const DESIRED_SRS_LEVEL = 4;
+  const DESIRED_SRS_LEVEL = 3;
 
   class WordElement {
     constructor(word) {
