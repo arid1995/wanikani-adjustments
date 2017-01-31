@@ -262,7 +262,7 @@ var inline_src = (<><![CDATA[
         this.sendRequest('GET', `vocabulary/${level}`).then((list) => {
           const vocabList = JSON.parse(list).requested_information;
           let previousWord = null;
-          vocabList.sort((left, right) => {return left.level < right.level;});
+          vocabList.sort((left, right) => {return left.level > right.level;});
 
           vocabList.forEach((value) => {
             if (value.user_specific !== null &&
@@ -276,8 +276,7 @@ var inline_src = (<><![CDATA[
               word.color = '#9400ff';
               word.highlight = (word.srsLevel > 1) ? 0 : 1;
 
-              if ((previousWord !== null && (previousWord.level !== word.level)) ||
-                    previousWord === null) {
+              if (previousWord === null || previousWord.level !== word.level) {
                 let marker = {};
                 marker.character = word.level;
                 marker.color = 'blue';
