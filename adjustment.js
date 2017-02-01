@@ -18,6 +18,7 @@ var inline_src = (<><![CDATA[
 (function() {
   const BASE_URL = 'https://www.wanikani.com/api/user/4c584e8833a17997674551e4538b7830/';
   const DESIRED_SRS_LEVEL = 3;
+  const begin = (new Date()).getTime();
 
   class WordElement {
     constructor(word) {
@@ -347,14 +348,12 @@ var inline_src = (<><![CDATA[
       });
       innerContainer.appendChild(list);
       outerContainer.appendChild(innerContainer);
+      alert('Скрипт закончил работу за ' + ((new Date()).getTime() - begin) + ' миллисекунд, так что отсоси');
     }
   }
 
-  let begin = (new Date()).getTime();
   const popOverWindow = new PopOverWindow(document.getElementsByTagName('body')[0]);
   const tamperer = new Tamperer();
-  for(let i = 0; i < 2000000000; i++);
-  alert('Скрипт закончил работу за ' + ((new Date()).getTime() - begin) + ' миллисекунд, так что отсоси');
 })();
 /* jshint ignore:start */
 ]]></>).toString();
