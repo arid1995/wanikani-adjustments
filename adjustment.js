@@ -18,7 +18,9 @@ var inline_src = (<><![CDATA[
 (function() {
   const BASE_URL = 'https://www.wanikani.com/api/user/4c584e8833a17997674551e4538b7830/';
   const DESIRED_SRS_LEVEL = 3;
-  const begin = (new Date()).getTime();
+  var begin;
+  let summary = '';
+  const chickenChicken = (new Date()).getTime();
 
   class WordElement {
     constructor(word) {
@@ -241,13 +243,16 @@ var inline_src = (<><![CDATA[
         this.level = level;
         this.buildVocab(`${this.level-1},${this.level}`).then(() => {
           this.visualize();
+          console.log(summary + 'Скрипт занял ' + ((new Date()).getTime() - chickenChicken) + ' миллисекунд, так что отсоси');
         });
       });
     }
 
     getLevel() {
       return new Promise ((resolve, reject) => {
+        begin = (new Date()).getTime();
         this.sendRequest('GET', 'user-information').then((userInfo) => {
+          summary += 'Данные о лвле получены за ' + ((new Date()).getTime() - begin) + ' миллисекунд, ';
           const info = JSON.parse(userInfo);
           resolve(info.user_information.level);
         })
@@ -261,7 +266,9 @@ var inline_src = (<><![CDATA[
 
     buildVocab(level) {
       return new Promise((resolve, reject) => {
+        begin = (new Date()).getTime();
         this.sendRequest('GET', `vocabulary/${level}`).then((list) => {
+        summary += 'Данные о словах ' + ((new Date()).getTime() - begin) + ' миллисекунд, ';
           const vocabList = JSON.parse(list).requested_information;
           let previousWord = null;
           vocabList.sort((left, right) => {return left.level > right.level;});
@@ -348,7 +355,6 @@ var inline_src = (<><![CDATA[
       });
       innerContainer.appendChild(list);
       outerContainer.appendChild(innerContainer);
-      alert('Скрипт закончил работу за ' + ((new Date()).getTime() - begin) + ' миллисекунд, так что отсоси');
     }
   }
 
