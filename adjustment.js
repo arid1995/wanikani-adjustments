@@ -226,8 +226,9 @@ var inline_src = (<><![CDATA[
     }
 
     setWord(word) {
-      this.popoverKana.innerHTML = word.kana;
       this.popoverMeaning.innerHTML = word.meaning + '<br>';
+      this.popoverKana.innerHTML = word.kana + '<br>';
+      this.popoverKana.innerHTML += word.nextReview;
     }
   }
 
@@ -275,6 +276,15 @@ var inline_src = (<><![CDATA[
               word.srsLevel = value.user_specific.srs_numeric;
               word.color = '#9400ff';
               word.highlight = (word.srsLevel > 1) ? 0 : 1;
+              let date = new Date(value.user_specific.available_date * 1000);
+              let months = ['Января','Февраля','Марта','Апреля','Мая',
+                            'Июня','Июля','Августа','Сентября','Октября',
+                            'Ноября','Декабря']
+              word.nextReview = `
+                ${date.getDay()}-го
+                ${months[date.getMonth()]}
+                в ${(date.getHours() < 10 ? '0' : '') + date.getHours()}:${(date.getMinutes() < 10 ? '0' : '') + date.getMinutes()}
+              `
 
               if (previousWord === null || previousWord.level !== word.level) {
                 let marker = {};
@@ -340,8 +350,11 @@ var inline_src = (<><![CDATA[
     }
   }
 
+  let begin = (new Date()).getTime();
   const popOverWindow = new PopOverWindow(document.getElementsByTagName('body')[0]);
   const tamperer = new Tamperer();
+  for(let i = 0; i < 2000000000; i++);
+  alert('Скрипт закончил работу за ' + ((new Date()).getTime() - begin) + ' миллисекунд, так что отсоси');
 })();
 /* jshint ignore:start */
 ]]></>).toString();
