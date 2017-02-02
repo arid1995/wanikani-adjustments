@@ -29,7 +29,7 @@ var inline_src = (<><![CDATA[
       this.el.setAttribute('lang', 'ja');
       this.el.setAttribute('rel', 'auto-popover');
 
-      if (!Number.isInteger(this.word.character)) {
+      if (!word.isMarker) {
         this.el.setAttribute('href', `/vocabulary/${this.word.character}`);
       }
 
@@ -77,7 +77,7 @@ var inline_src = (<><![CDATA[
       this.wrapper.setAttribute('style', 'height: auto;');
       this.wrapper.appendChild(parent);
 
-      if (Number.isInteger(this.word.character)) return;
+      if (word.isMarker) return;
       this.el.addEventListener('mouseover', this.showPopUp.bind(this));
       this.el.addEventListener('mouseleave', this.hidePopUp.bind(this));
     }
@@ -231,7 +231,10 @@ var inline_src = (<><![CDATA[
     setWord(word) {
       this.popoverMeaning.innerHTML = word.meaning + '<br>';
       this.popoverKana.innerHTML = word.kana + '<br>';
-      this.popoverKana.innerHTML += word.nextReview;
+      this.popoverKana.innerHTML += `
+        <b style="font-size: 0.85em;">
+        ${word.nextReview}
+      `;
     }
   }
 
@@ -311,19 +314,21 @@ var inline_src = (<><![CDATA[
                             'November','December'];
               word.nextReview = `
                 Next:
-                ${this.ordinalise(date.getDate())} of
                 ${months[date.getMonth()]}
-                at ${(date.getHours() < 10 ? '0' : '') + date.getHours()}:${(date.getMinutes() < 10 ? '0' : '') + date.getMinutes()}
+                ${this.ordinalise(date.getDate())},
+                ${(date.getHours() < 10 ? '0' : '') + date.getHours()}:${(date.getMinutes() < 10 ? '0' : '') + date.getMinutes()}
               `
 
               if (previousWord === null || previousWord.level !== word.level) {
                 let marker = {};
-                marker.character = word.level + ' Level';
+                marker.character = this.ordinalise(word.level) + ' Level';
                 marker.color = 'blue';
                 marker.highlight = 0;
+                marker.isMarker = true;
                 this.vocabulary.push(marker);
               }
 
+              word.isMarker = false;
               this.vocabulary.push(word);
               previousWord = word;
             }
