@@ -3,6 +3,7 @@
 // @namespace    org.dimwits
 // @version      1.0
 // @description  Adds vocabulary to the wanikani dashboard
+// @match        https://www.wanikani.com/dashboard
 // @author       Eekone
 // @grant        none
 // ==/UserScript==
