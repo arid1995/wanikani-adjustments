@@ -16,8 +16,8 @@ var inline_src = (<><![CDATA[
 /* jshint esversion: 6 */
 
 (function() {
-  const BASE_URL = 'https://www.wanikani.com/api/user/4c584e8833a17997674551e4538b7830/';
-  const DESIRED_SRS_LEVEL = 3;
+  const BASE_URL = 'https://www.wanikani.com/api/user/78ee00003ccabd75f3b4e829308d858a/';
+  const DESIRED_SRS_LEVEL = 4;
   var begin;
   let summary = '';
   const chickenChicken = (new Date()).getTime();
@@ -86,19 +86,19 @@ var inline_src = (<><![CDATA[
       this.progressBarLength = {top: 0, bottom: 0};
       switch (this.word.srsLevel) {
         case 4:
-          this.progressBarLength.top = 0;
+          this.progressBarLength.top = 50;
           this.progressBarLength.bottom = 0;
           break;
         case 3:
           this.progressBarLength.top = 50;
-          this.progressBarLength.bottom = 0;
+          this.progressBarLength.bottom = 50;
           break;
         case 2:
           this.progressBarLength.top = 50;
-          this.progressBarLength.bottom = 50;
+          this.progressBarLength.bottom = 100;
           break;
         case 1:
-          this.progressBarLength.top = 50;
+          this.progressBarLength.top = 100;
           this.progressBarLength.bottom = 100;
           break;
         default:
@@ -264,6 +264,26 @@ var inline_src = (<><![CDATA[
       return document.querySelector('.progression');
     }
 
+    ordinalise(number) {
+      let suffix = '';
+
+      switch (true) {
+        case (number % 10 === 1 && number !== 11):
+          suffix = 'st';
+          break;
+        case (number % 10 === 2 && number !== 12):
+          suffix = 'nd';
+          break;
+        case (number % 10 === 3 && number !== 13):
+          suffix = 'rd';
+          break;
+        default:
+          suffix = 'th';
+      }
+
+      return number + suffix;
+    }
+
     buildVocab(level) {
       return new Promise((resolve, reject) => {
         begin = (new Date()).getTime();
@@ -284,19 +304,21 @@ var inline_src = (<><![CDATA[
               word.srsLevel = value.user_specific.srs_numeric;
               word.color = '#9400ff';
               word.highlight = (word.srsLevel > 1) ? 0 : 1;
+
               let date = new Date(value.user_specific.available_date * 1000);
-              let months = ['Января','Февраля','Марта','Апреля','Мая',
-                            'Июня','Июля','Августа','Сентября','Октября',
-                            'Ноября','Декабря']
+              let months = ['January','February','March','April','May',
+                            'June','July','August','September','October',
+                            'November','December'];
               word.nextReview = `
-                ${date.getDay()}-го
+                Next:
+                ${this.ordinalise(date.getDate())} of
                 ${months[date.getMonth()]}
-                в ${(date.getHours() < 10 ? '0' : '') + date.getHours()}:${(date.getMinutes() < 10 ? '0' : '') + date.getMinutes()}
+                at ${(date.getHours() < 10 ? '0' : '') + date.getHours()}:${(date.getMinutes() < 10 ? '0' : '') + date.getMinutes()}
               `
 
               if (previousWord === null || previousWord.level !== word.level) {
                 let marker = {};
-                marker.character = word.level;
+                marker.character = word.level + ' Level';
                 marker.color = 'blue';
                 marker.highlight = 0;
                 this.vocabulary.push(marker);
@@ -336,7 +358,7 @@ var inline_src = (<><![CDATA[
         const innerContainer = document.createElement('section');
 
         const title = document.createElement('h3');
-        title.innerHTML = `Level ${this.level} Vocabulary Progression`;
+        title.innerHTML = `Recent Vocabulary Progression`;
         innerContainer.appendChild(title);
 
         innerContainer.setAttribute('class', 'lattice-multi-character');
