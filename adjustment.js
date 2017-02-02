@@ -1,20 +1,11 @@
 // ==UserScript==
-// @name         Vocabulary for dashboard
-// @namespace    http://tampermonkey.net/
+// @name         Vocabulary for Wanikani
+// @namespace    org.dimwits
 // @version      1.0
 // @description  Adds vocabulary to the wanikani dashboard
 // @author       Eekone
-// @require      https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.18.2/babel.js
-// @require      https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/6.16.0/polyfill.js
-// @match        https://www.wanikani.com/dashboard
+// @grant        none
 // ==/UserScript==
-
-/* jshint ignore:start */
-var inline_src = (<><![CDATA[
-/* jshint ignore:end */
-/* jshint esnext: false */
-/* jshint esversion: 6 */
-
 (function() {
   const BASE_URL = 'https://www.wanikani.com/api/user/78ee00003ccabd75f3b4e829308d858a/';
   const DESIRED_SRS_LEVEL = 4;
@@ -388,8 +379,3 @@ var inline_src = (<><![CDATA[
   const popOverWindow = new PopOverWindow(document.getElementsByTagName('body')[0]);
   const tamperer = new Tamperer();
 })();
-/* jshint ignore:start */
-]]></>).toString();
-var c = Babel.transform(inline_src, { presets: [ "es2015", "es2016" ] });
-eval(c.code);
-/* jshint ignore:end */
