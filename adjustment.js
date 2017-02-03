@@ -1,4 +1,4 @@
-// ==UserScript==
+﻿// ==UserScript==
 // @name         Vocabulary for Wanikani
 // @namespace    org.dimwits
 // @version      1.0
@@ -10,8 +10,7 @@
 (function() {
   const BASE_URL = 'https://www.wanikani.com/api/user/78ee00003ccabd75f3b4e829308d858a/';
   const DESIRED_SRS_LEVEL = 4;
-  var begin;
-  let summary = '';
+  var begin; 
   const chickenChicken = (new Date()).getTime();
 
   class WordElement {
@@ -25,13 +24,11 @@
         this.el.setAttribute('href', `/vocabulary/${this.word.character}`);
       }
 
-      let parent = document.createElement('div');
+      let parent = document.createElement('li');
       parent.setAttribute('style', `
         background-color: rgba(148, 0, 255, 0.4);
-        border-radius: 5px;
-        border-width: ${this.word.highlight}px;
-        border-color: red;
-        border-style: solid;
+        border: ${this.word.highlight}px solid red;
+        border-radius: 5px;               
         height: 28px;
         z-index: 2;
       `);
@@ -75,27 +72,20 @@
     }
 
     determineProgressBarLength() {
-      this.progressBarLength = {top: 0, bottom: 0};
+      this.progressBarLength = {top: 50, bottom: 100};
       switch (this.word.srsLevel) {
-        case 4:
-          this.progressBarLength.top = 50;
+        case 4:          
           this.progressBarLength.bottom = 0;
           break;
-        case 3:
-          this.progressBarLength.top = 50;
+        case 3:          
           this.progressBarLength.bottom = 50;
           break;
-        case 2:
-          this.progressBarLength.top = 50;
-          this.progressBarLength.bottom = 100;
-          break;
+        case 2: break;
         case 1:
-          this.progressBarLength.top = 100;
-          this.progressBarLength.bottom = 100;
+          this.progressBarLength.top = 100;          
           break;
         default:
-          this.progressBarLength.top = 100;
-          this.progressBarLength.bottom = 100;
+          this.progressBarLength.top = 100;          
       }
     }
 
@@ -134,7 +124,7 @@
       const bBox = this.el.getBoundingClientRect();
       const width = bBox.right - bBox.left;
       const height = bBox.bottom - bBox.top;
-      popOverWindow.setCoordinatesAndShow(coords.left, coords.top - height, width);
+      popOverWindow.setCoordinatesAndShow(coords.left, coords.top - height-5, width);
       popOverWindow.setWord(this.word);
     }
 
@@ -173,22 +163,10 @@
       this.popoverKana = document.createElement('span');
       this.popoverKana.setAttribute('lang', 'ja');
       this.popoverTitle.appendChild(this.popoverKana);
-
-      this.popoverInner.appendChild(this.popoverTitle);
-
-      this.popoverProgress = document.createElement('div');
-      this.popoverProgress.setAttribute('class', 'bar');
-      this.popoverProgress.setAttribute('style', 'width: 80%;');
-      this.popoverProgress.innerHTML = 'useless info';
+      this.popoverInner.appendChild(this.popoverTitle);      
 
       let contentContainer = document.createElement('div');
       contentContainer.setAttribute('class', 'popover-content');
-
-      let progressContainer = document.createElement('div');
-      progressContainer.setAttribute('class', 'progress');
-      progressContainer.appendChild(this.popoverProgress);
-      contentContainer.appendChild(progressContainer);
-
       this.el.appendChild(this.popoverInner);
       this.el.appendChild(contentContainer);
     }
@@ -224,7 +202,7 @@
       this.popoverMeaning.innerHTML = word.meaning + '<br>';
       this.popoverKana.innerHTML = word.kana + '<br>';
       this.popoverKana.innerHTML += `
-        <b style="font-size: 0.85em;">
+        <b style="font-size: 0.75em;">
         ${word.nextReview}
       `;
     }
@@ -237,8 +215,7 @@
       this.getLevel().then((level) => {
         this.level = level;
         this.buildVocab(`${this.level-1},${this.level}`).then(() => {
-          this.visualize();
-          console.log(summary + 'Скрипт занял ' + ((new Date()).getTime() - chickenChicken) + ' миллисекунд, так что отсоси');
+          this.visualize();          
         });
       });
     }
@@ -246,8 +223,7 @@
     getLevel() {
       return new Promise ((resolve, reject) => {
         begin = (new Date()).getTime();
-        this.sendRequest('GET', 'user-information').then((userInfo) => {
-          summary += 'Данные о лвле получены за ' + ((new Date()).getTime() - begin) + ' миллисекунд, ';
+        this.sendRequest('GET', 'user-information').then((userInfo) => {          
           const info = JSON.parse(userInfo);
           resolve(info.user_information.level);
         })
@@ -257,37 +233,15 @@
 
     getOuterContainer() {
       return document.querySelector('.progression');
-    }
-
-    ordinalise(number) {
-      let suffix = '';
-
-      switch (true) {
-        case (number % 10 === 1 && number !== 11):
-          suffix = 'st';
-          break;
-        case (number % 10 === 2 && number !== 12):
-          suffix = 'nd';
-          break;
-        case (number % 10 === 3 && number !== 13):
-          suffix = 'rd';
-          break;
-        default:
-          suffix = 'th';
-      }
-
-      return number + suffix;
-    }
+    }   
 
     buildVocab(level) {
       return new Promise((resolve, reject) => {
         begin = (new Date()).getTime();
-        this.sendRequest('GET', `vocabulary/${level}`).then((list) => {
-        summary += 'Данные о словах ' + ((new Date()).getTime() - begin) + ' миллисекунд, ';
+        this.sendRequest('GET', `vocabulary/${level}`).then((list) => {        
           const vocabList = JSON.parse(list).requested_information;
           let previousWord = null;
           vocabList.sort((left, right) => {return left.level > right.level;});
-
           vocabList.forEach((value) => {
             if (value.user_specific !== null &&
                   value.user_specific.srs_numeric <= DESIRED_SRS_LEVEL) {
@@ -301,20 +255,18 @@
               word.highlight = (word.srsLevel > 1) ? 0 : 1;
 
               let date = new Date(value.user_specific.available_date * 1000);
-              let months = ['January','February','March','April','May',
-                            'June','July','August','September','October',
-                            'November','December'];
+              let months = ['Jan','Feb','Mar','Apr','May', 'Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
               word.nextReview = `
                 Next:
                 ${months[date.getMonth()]}
-                ${this.ordinalise(date.getDate())},
+                ${date.getDate()},
                 ${(date.getHours() < 10 ? '0' : '') + date.getHours()}:${(date.getMinutes() < 10 ? '0' : '') + date.getMinutes()}
               `
 
               if (previousWord === null || previousWord.level !== word.level) {
                 let marker = {};
-                marker.character = this.ordinalise(word.level) + ' Level';
-                marker.color = 'blue';
+                marker.character = word.level + ' Level';
+                marker.color = '#434343';
                 marker.highlight = 0;
                 marker.isMarker = true;
                 this.vocabulary.push(marker);
