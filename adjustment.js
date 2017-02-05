@@ -8,11 +8,44 @@
 // @grant        none
 // ==/UserScript==
 (function() {
-  const BASE_URL = 'https://www.wanikani.com/api/user/78ee00003ccabd75f3b4e829308d858a/';
+  var BASE_URL = 'https://www.wanikani.com/api/user/';
   const DESIRED_SRS_LEVEL = 4;
   var begin; 
   const chickenChicken = (new Date()).getTime();
 
+  function get_api_key() {
+    var done = $.Deferred();
+
+    // First check if the API key is in local storage.
+    var api_key = localStorage.getItem('apiKey');
+    if (api_key && api_key.length == 32) return done.resolve();
+
+    // We don't have the API key.  Fetch it from the /account page.
+    dlog(1,'wkdpp: Fetching api_key');
+    $.get('/account')
+    .done(function(page){
+        // Make sure what we got is a web page.
+        if (typeof page !== 'string') {return done.reject();}
+
+        // Extract the API key.
+        var api_key = $(page).find('#api-button').parent().find('input').attr('value');
+        if (typeof api_key !== 'string' || api_key.length !== 32)  {return done.reject();}
+
+        // Store the updated user info.
+        localStorage.setItem('apiKey', api_key);
+
+        // Return success.
+        done.resolve();
+    })
+    .fail(function(){
+        // Failed to get web page.
+        done.reject();
+    });
+
+    return done.promise();
+}
+  
+  
   class WordElement {
     constructor(word) {
       this.word = word;
@@ -59,6 +92,7 @@
         z-index: 2;
         box-shadow: 0 0 0 0;
         -webkit-box-shadow: 0 0 0 0;
+         flex-grow: 1;  
       `);
 
       this.el.innerHTML = word.character;
@@ -221,7 +255,7 @@
     }
 
     getLevel() {
-      return new Promise ((resolve, reject) => {
+      return new Promise ((resolve, reject) => {        
         begin = (new Date()).getTime();
         this.sendRequest('GET', 'user-information').then((userInfo) => {          
           const info = JSON.parse(userInfo);
@@ -240,8 +274,9 @@
         begin = (new Date()).getTime();
         this.sendRequest('GET', `vocabulary/${level}`).then((list) => {        
           const vocabList = JSON.parse(list).requested_information;
-          let previousWord = null;
-          vocabList.sort((left, right) => {return left.level > right.level;});
+          let previousWord = null;          
+
+          vocabList.sort((left, right) => {return left.level - right.level;});
           vocabList.forEach((value) => {
             if (value.user_specific !== null &&
                   value.user_specific.srs_numeric <= DESIRED_SRS_LEVEL) {
@@ -285,8 +320,9 @@
 
     sendRequest(method, relativeURL) {
       return new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open(method, BASE_URL + relativeURL);
+        const xhr = new XMLHttpRequest();          
+       var api_key = localStorage.getItem('apiKey');
+        xhr.open(method, BASE_URL +api_key +'/'+relativeURL);
         xhr.send();
         xhr.onreadystatechange = function() {
           if (xhr.readyState == 4) {
@@ -319,11 +355,29 @@
           flex-flow: row wrap;
         `);
 
-
+    let sublist = document.createElement('ul');
+        innerContainer.appendChild(sublist);
         this.vocabulary.forEach((word) => {
+          if (word.isMarker) {
+            sublist = document.createElement('ul');
+            sublist.setAttribute('style', `
+             display: flex;     
+             flex-flow: row wrap;  
+             justify-content:space-between;
+           `);
+            innerContainer.appendChild(sublist);
+          }
           let wordElement = new WordElement(word);
-          wordElement.attachTo(list);
+          wordElement.attachTo(sublist);
       });
+      let after = document.createElement('li');
+      after.setAttribute('style', `
+             content: "";                
+             flex: auto;
+             flex-grow: 100;
+           `);
+      sublist.appendChild(after);
+     
       innerContainer.appendChild(list);
       outerContainer.appendChild(innerContainer);
     }
