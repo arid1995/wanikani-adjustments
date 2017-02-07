@@ -223,7 +223,10 @@
     getApiKey() {
       return new Promise((resolve, reject) => {
         this.apiKey = localStorage.getItem('apiKey');
-        if (this.apiKey !== null && this.apiKey.length === 32) resolve();
+        if (this.apiKey !== null && this.apiKey.length === 32) {
+          resolve();
+          return;
+        }
 
         this.sendRequest('GET', '/account').then((response) => {
           let pattern = new RegExp('<input value="([a-z0-9]{32}).*\n.*/api/user/generate_key');
@@ -255,7 +258,17 @@
           const vocabList = JSON.parse(list).requested_information;
           let previousWord = null;
 
-          vocabList.sort((left, right) => {return left.level - right.level;});
+          //Delete all unnecessary elements
+          for (let i = vocabList.length - 1; i >= 0; i--) {
+            if (vocabList[i].user_specific === null) {
+              vocabList.splice(i, 1);
+            }
+          }
+
+          vocabList.sort((left, right) => {
+              return (left.level - right.level === 0) ? left.user_specific.available_date - right.user_specific.available_date : left.level - right.level;
+          });
+
           vocabList.forEach((value) => {
             if (value.user_specific !== null &&
                   value.user_specific.srs_numeric <= DESIRED_SRS_LEVEL) {
@@ -267,6 +280,7 @@
               word.srsLevel = value.user_specific.srs_numeric;
               word.color = '#9400ff';
               word.highlight = (word.srsLevel > 1) ? 0 : 1;
+              word.availableDate = value.user_specific.available_date;
 
               let date = new Date(value.user_specific.available_date * 1000);
               let months = ['Jan','Feb','Mar','Apr','May', 'Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
