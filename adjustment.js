@@ -8,44 +8,8 @@
 // @grant        none
 // ==/UserScript==
 (function() {
-  var BASE_URL = 'https://www.wanikani.com/api/user/';
   const DESIRED_SRS_LEVEL = 4;
-  var begin; 
-  const chickenChicken = (new Date()).getTime();
 
-  function get_api_key() {
-    var done = $.Deferred();
-
-    // First check if the API key is in local storage.
-    var api_key = localStorage.getItem('apiKey');
-    if (api_key && api_key.length == 32) return done.resolve();
-
-    // We don't have the API key.  Fetch it from the /account page.
-    dlog(1,'wkdpp: Fetching api_key');
-    $.get('/account')
-    .done(function(page){
-        // Make sure what we got is a web page.
-        if (typeof page !== 'string') {return done.reject();}
-
-        // Extract the API key.
-        var api_key = $(page).find('#api-button').parent().find('input').attr('value');
-        if (typeof api_key !== 'string' || api_key.length !== 32)  {return done.reject();}
-
-        // Store the updated user info.
-        localStorage.setItem('apiKey', api_key);
-
-        // Return success.
-        done.resolve();
-    })
-    .fail(function(){
-        // Failed to get web page.
-        done.reject();
-    });
-
-    return done.promise();
-}
-  
-  
   class WordElement {
     constructor(word) {
       this.word = word;
@@ -61,7 +25,7 @@
       parent.setAttribute('style', `
         background-color: rgba(148, 0, 255, 0.4);
         border: ${this.word.highlight}px solid red;
-        border-radius: 5px;               
+        border-radius: 5px;
         height: 28px;
         z-index: 2;
       `);
@@ -92,7 +56,7 @@
         z-index: 2;
         box-shadow: 0 0 0 0;
         -webkit-box-shadow: 0 0 0 0;
-         flex-grow: 1;  
+         flex-grow: 1;
       `);
 
       this.el.innerHTML = word.character;
@@ -108,18 +72,18 @@
     determineProgressBarLength() {
       this.progressBarLength = {top: 50, bottom: 100};
       switch (this.word.srsLevel) {
-        case 4:          
+        case 4:
           this.progressBarLength.bottom = 0;
           break;
-        case 3:          
+        case 3:
           this.progressBarLength.bottom = 50;
           break;
         case 2: break;
         case 1:
-          this.progressBarLength.top = 100;          
+          this.progressBarLength.top = 100;
           break;
         default:
-          this.progressBarLength.top = 100;          
+          this.progressBarLength.top = 100;
       }
     }
 
@@ -197,7 +161,7 @@
       this.popoverKana = document.createElement('span');
       this.popoverKana.setAttribute('lang', 'ja');
       this.popoverTitle.appendChild(this.popoverKana);
-      this.popoverInner.appendChild(this.popoverTitle);      
+      this.popoverInner.appendChild(this.popoverTitle);
 
       let contentContainer = document.createElement('div');
       contentContainer.setAttribute('class', 'popover-content');
@@ -221,7 +185,7 @@
         this.left = left - this.width;
         this.el.setAttribute('class', 'popover lattice left in');
       } else {
-        this.left = left + elementWidth
+        this.left = left + elementWidth;
         this.el.setAttribute('class', 'popover lattice right in');
       }
 
@@ -244,20 +208,36 @@
 
   class Tamperer {
     constructor() {
+      this.baseURL = `https://www.wanikani.com/`;
       this.vocabulary = [];
+      this.getApiKey().then(() => {
+        this.getLevel().then((level) => {
+          this.level = level;
+          this.buildVocab(`${this.level-1},${this.level}`).then(() => {
+            this.visualize();
+          });
+        });
+      });
+    }
 
-      this.getLevel().then((level) => {
-        this.level = level;
-        this.buildVocab(`${this.level-1},${this.level}`).then(() => {
-          this.visualize();          
+    getApiKey() {
+      return new Promise((resolve, reject) => {
+        this.apiKey = localStorage.getItem('apiKey');
+        if (this.apiKey !== null && this.apiKey.length === 32) resolve();
+
+        this.sendRequest('GET', '/account').then((response) => {
+          let pattern = new RegExp('<input value="([a-z0-9]{32}).*\n.*/api/user/generate_key');
+          this.apiKey = pattern.exec(response)[1];
+          localStorage.setItem('apiKey', this.apiKey);
+
+          resolve();
         });
       });
     }
 
     getLevel() {
-      return new Promise ((resolve, reject) => {        
-        begin = (new Date()).getTime();
-        this.sendRequest('GET', 'user-information').then((userInfo) => {          
+      return new Promise ((resolve, reject) => {
+        this.sendRequest('GET', `api/user/${this.apiKey}/user-information`).then((userInfo) => {
           const info = JSON.parse(userInfo);
           resolve(info.user_information.level);
         })
@@ -267,14 +247,13 @@
 
     getOuterContainer() {
       return document.querySelector('.progression');
-    }   
+    }
 
     buildVocab(level) {
       return new Promise((resolve, reject) => {
-        begin = (new Date()).getTime();
-        this.sendRequest('GET', `vocabulary/${level}`).then((list) => {        
+        this.sendRequest('GET', `api/user/${this.apiKey}/vocabulary/${level}`).then((list) => {
           const vocabList = JSON.parse(list).requested_information;
-          let previousWord = null;          
+          let previousWord = null;
 
           vocabList.sort((left, right) => {return left.level - right.level;});
           vocabList.forEach((value) => {
@@ -296,7 +275,7 @@
                 ${months[date.getMonth()]}
                 ${date.getDate()},
                 ${(date.getHours() < 10 ? '0' : '') + date.getHours()}:${(date.getMinutes() < 10 ? '0' : '') + date.getMinutes()}
-              `
+              `;
 
               if (previousWord === null || previousWord.level !== word.level) {
                 let marker = {};
@@ -319,10 +298,11 @@
     }
 
     sendRequest(method, relativeURL) {
+      console.log(relativeURL);
       return new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();          
+        const xhr = new XMLHttpRequest();
        var api_key = localStorage.getItem('apiKey');
-        xhr.open(method, BASE_URL +api_key +'/'+relativeURL);
+        xhr.open(method, this.baseURL + relativeURL);
         xhr.send();
         xhr.onreadystatechange = function() {
           if (xhr.readyState == 4) {
@@ -361,8 +341,8 @@
           if (word.isMarker) {
             sublist = document.createElement('ul');
             sublist.setAttribute('style', `
-             display: flex;     
-             flex-flow: row wrap;  
+             display: flex;
+             flex-flow: row wrap;
              justify-content:space-between;
            `);
             innerContainer.appendChild(sublist);
@@ -372,12 +352,12 @@
       });
       let after = document.createElement('li');
       after.setAttribute('style', `
-             content: "";                
+             content: "";
              flex: auto;
              flex-grow: 100;
            `);
       sublist.appendChild(after);
-     
+
       innerContainer.appendChild(list);
       outerContainer.appendChild(innerContainer);
     }
