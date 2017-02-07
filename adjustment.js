@@ -253,6 +253,7 @@
     }
 
     buildVocab(level) {
+      const currentDate = new Date();
       return new Promise((resolve, reject) => {
         this.sendRequest('GET', `api/user/${this.apiKey}/vocabulary/${level}`).then((list) => {
           const vocabList = JSON.parse(list).requested_information;
@@ -284,12 +285,16 @@
 
               let date = new Date(value.user_specific.available_date * 1000);
               let months = ['Jan','Feb','Mar','Apr','May', 'Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-              word.nextReview = `
-                Next:
-                ${months[date.getMonth()]}
-                ${date.getDate()},
-                ${(date.getHours() < 10 ? '0' : '') + date.getHours()}:${(date.getMinutes() < 10 ? '0' : '') + date.getMinutes()}
-              `;
+              if (word.availableDate * 1000 < currentDate.getTime()) {
+                word.nextReview = "Available now";
+              } else {
+                word.nextReview = `
+                  Next:
+                  ${months[date.getMonth()]}
+                  ${date.getDate()},
+                  ${(date.getHours() < 10 ? '0' : '') + date.getHours()}:${(date.getMinutes() < 10 ? '0' : '') + date.getMinutes()}
+                `;
+              }
 
               if (previousWord === null || previousWord.level !== word.level) {
                 let marker = {};
