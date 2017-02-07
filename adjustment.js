@@ -9,6 +9,7 @@
 // ==/UserScript==
 (function() {
   const DESIRED_SRS_LEVEL = 4;
+  const LEVELS_TO_RETRIEVE = 10;
 
   class WordElement {
     constructor(word) {
@@ -213,7 +214,10 @@
       this.getApiKey().then(() => {
         this.getLevel().then((level) => {
           this.level = level;
-          this.buildVocab(`${this.level-1},${this.level}`).then(() => {
+          let levelString = '';
+          for(let i = this.level; i >= 0 && i > this.level - LEVELS_TO_RETRIEVE; i--)
+            levelString += `${i},`;
+          this.buildVocab(levelString.slice(0, -1)).then(() => {
             this.visualize();
           });
         });
