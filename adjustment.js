@@ -1,14 +1,14 @@
-﻿// ==UserScript==
+// ==UserScript==
 // @name         Vocabulary for Wanikani
 // @namespace    org.dimwits
-// @version      1.0
+// @version      1.1.7
 // @description  Adds vocabulary to the wanikani dashboard
-// @match        https://www.wanikani.com/dashboard
+// @include        https://www.wanikani.com/dashboard
+// @include        https://www.wanikani.com
 // @author       Eekone
 // @grant        none
 // ==/UserScript==
 (function() {
-  const DESIRED_SRS_LEVEL = 4;
   const LEVELS_TO_RETRIEVE = 10;
 
   class WordElement {
@@ -24,7 +24,7 @@
 
       let parent = document.createElement('li');
       parent.setAttribute('style', `
-        background-color: rgba(148, 0, 255, 0.4);
+        background-color: ${(this.word.nextReview == 'Available Now') ? 'rgba(25, 255, 86, 0.5)' : 'rgba(148, 0, 255, 0.4)'};
         border: ${this.word.highlight}px solid red;
         border-radius: 5px;
         height: 28px;
@@ -229,10 +229,11 @@
         this.apiKey = localStorage.getItem('apiKey');
         if (this.apiKey !== null && this.apiKey.length === 32) {
           resolve();
+
           return;
         }
 
-        this.sendRequest('GET', '/account').then((response) => {
+        this.sendRequest('GET', '/settings/account').then((response) => {
           let pattern = new RegExp('<input value="([a-z0-9]{32}).*\n.*/api/user/generate_key');
           this.apiKey = pattern.exec(response)[1];
           localStorage.setItem('apiKey', this.apiKey);
@@ -247,14 +248,13 @@
         this.sendRequest('GET', `api/user/${this.apiKey}/user-information`).then((userInfo) => {
           const info = JSON.parse(userInfo);
           resolve(info.user_information.level);
+          console.log('click');
         })
         .catch(() => alert('Something has gone south when obtaining level'));
       });
     }
 
-    getOuterContainer() {
-      return document.querySelector('.progression');
-    }
+    getOuterContainer() {return document.querySelector('.progression');}
 
     buildVocab(level) {
       const currentDate = new Date();
@@ -271,12 +271,12 @@
           }
 
           vocabList.sort((left, right) => {
-              return (left.level - right.level === 0) ? left.user_specific.available_date - right.user_specific.available_date : left.level - right.level;
+              return (left.level - right.level === 0) ? left.user_specific.available_date - right.user_specific.available_date : right.level - left.level;
           });
 
           vocabList.forEach((value) => {
             if (value.user_specific !== null &&
-                  value.user_specific.srs_numeric <= DESIRED_SRS_LEVEL) {
+                  value.user_specific.srs_numeric <= 4) {
               let word = {};
               word.character = value.character;
               word.kana = value.kana;
@@ -286,25 +286,12 @@
               word.color = '#9400ff';
               word.highlight = (word.srsLevel > 1) ? 0 : 1;
               word.availableDate = value.user_specific.available_date;
-
-              let date = new Date(value.user_specific.available_date * 1000);
-              let months = ['Jan','Feb','Mar','Apr','May', 'Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-              if (word.availableDate * 1000 < currentDate.getTime()) {
-                word.nextReview = "Available now";
-              } else {
-                word.nextReview = `
-                  Next:
-                  ${months[date.getMonth()]}
-                  ${date.getDate()},
-                  ${(date.getHours() < 10 ? '0' : '') + date.getHours()}:${(date.getMinutes() < 10 ? '0' : '') + date.getMinutes()}
-                `;
-              }
+              word.nextReview = this.formatDate(new Date(value.user_specific.available_date * 1000));
 
               if (previousWord === null || previousWord.level !== word.level) {
                 let marker = {};
-                marker.character = word.level + ' Level';
+                marker.character = word.level;
                 marker.color = '#434343';
-                marker.highlight = 0;
                 marker.isMarker = true;
                 this.vocabulary.push(marker);
               }
@@ -320,6 +307,34 @@
       });
     }
 
+    formatDate(d){
+      var s = 'Next: ';
+      var now = new Date();
+      var YY = d.getFullYear(),
+          MM = d.getMonth(),
+          DD = d.getDate(),
+          hh = d.getHours(),
+          mm = d.getMinutes(),
+          one_day = 24*60*60*1000;
+
+      if (d < now) return "Available Now";
+      var same_day = ((YY == now.getFullYear()) && (MM == now.getMonth()) && (DD == now.getDate()) ? 1 : 0);
+
+      if (same_day) {
+          s += 'Today ';
+      } else {
+          s += ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]+', '+
+               ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][MM]+' '+DD+', ';
+      }
+      s += ('0'+hh).slice(-2)+':'+('0'+mm).slice(-2);
+
+      if (!same_day) {
+          var days = (Math.floor((d.getTime()-d.getTimezoneOffset()*60*1000)/one_day)-Math.floor((now.getTime()-d.getTimezoneOffset()*60*1000)/one_day));
+          if (days) s += ' ('+days+' day'+(days>1?'s':'')+')';
+      }
+      return s;
+  }
+
     sendRequest(method, relativeURL) {
       console.log(relativeURL);
       return new Promise((resolve, reject) => {
@@ -329,11 +344,8 @@
         xhr.send();
         xhr.onreadystatechange = function() {
           if (xhr.readyState == 4) {
-            if (this.status == 200) {
-              resolve(xhr.responseText);
-            } else {
-              reject();
-            }
+            if (this.status == 200) {resolve(xhr.responseText);}
+            else {reject();}
           }
         };
       });
@@ -341,48 +353,42 @@
 
     visualize() {
         const outerContainer = this.getOuterContainer();
-        outerContainer.appendChild(document.createElement('hr'));
-
-        const innerContainer = document.createElement('section');
-
+        const vocabProgress = document.createElement('div');
         const title = document.createElement('h3');
         title.innerHTML = `Recent Vocabulary Progression`;
-        innerContainer.appendChild(title);
+        vocabProgress.appendChild(title);
+        vocabProgress.setAttribute('class', 'vocabulary-progress');
 
-        innerContainer.setAttribute('class', 'lattice-multi-character');
+        let lattice =document.createElement('div');
+        lattice.setAttribute('class', 'lattice-multi-character');
+        vocabProgress.appendChild(lattice);
 
-        let list = document.createElement('ul');
-        list.setAttribute('style', `
-          display: flex;
-          justify-content: space-around;
-          flex-flow: row wrap;
-        `);
-
-    let sublist = document.createElement('ul');
-        innerContainer.appendChild(sublist);
+        let levelList = document.createElement('ul');
+        var flag=0;
         this.vocabulary.forEach((word) => {
-          if (word.isMarker) {
-            sublist = document.createElement('ul');
-            sublist.setAttribute('style', `
+          if (word.isMarker && flag<3) {
+            levelList = document.createElement('ul');
+            levelList.setAttribute('style', `
              display: flex;
              flex-flow: row wrap;
              justify-content:space-between;
            `);
-            innerContainer.appendChild(sublist);
-          }
-          let wordElement = new WordElement(word);
-          wordElement.attachTo(sublist);
-      });
-      let after = document.createElement('li');
-      after.setAttribute('style', `
+            let after = document.createElement('li');
+            after.setAttribute('style', `
              content: "";
              flex: auto;
              flex-grow: 100;
+             order: 1;
            `);
-      sublist.appendChild(after);
+           levelList.appendChild(after);
+            lattice.appendChild(levelList);
+            flag=flag+1;
+          }
+          let wordElement = new WordElement(word);
+          wordElement.attachTo(levelList);
 
-      innerContainer.appendChild(list);
-      outerContainer.appendChild(innerContainer);
+      });
+      outerContainer.appendChild(vocabProgress);
     }
   }
 
