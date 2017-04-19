@@ -24,7 +24,7 @@
 
       let parent = document.createElement('li');
       parent.setAttribute('style', `
-        background-color: ${(this.word.nextReview == 'Available Now') ? 'rgba(25, 255, 86, 0.5)' : 'rgba(148, 0, 255, 0.4)'};
+        background-color: ${(this.word.nextReview == 'Available Now') ? 'rgba(25, 255, 86, 0.8)' : 'rgba(148, 0, 255, 0.4)'};
         border: ${this.word.highlight}px solid red;
         border-radius: 5px;
         height: 28px;
