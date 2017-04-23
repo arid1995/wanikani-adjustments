@@ -215,11 +215,12 @@
         this.getLevel().then((level) => {
           this.level = level;
           let levelString = '';
+
           for(let i = this.level; i >= 0 && i > this.level - LEVELS_TO_RETRIEVE; i--)
-            levelString += `${i},`;
-          this.buildVocab(levelString.slice(0, -1)).then(() => {
-            this.visualize();
-          });
+            this.buildVocab(i).then(() => {
+              this.visualize();
+              this.vocabulary = [];
+            });
         });
       });
     }
@@ -354,9 +355,6 @@
     visualize() {
         const outerContainer = this.getOuterContainer();
         const vocabProgress = document.createElement('div');
-        const title = document.createElement('h3');
-        title.innerHTML = `Recent Vocabulary Progression`;
-        vocabProgress.appendChild(title);
         vocabProgress.setAttribute('class', 'vocabulary-progress');
 
         let lattice =document.createElement('div');
