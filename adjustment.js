@@ -10,6 +10,7 @@
 // ==/UserScript==
 (function() {
   const LEVELS_TO_RETRIEVE = 10;
+  const TIME_INTERVAL = 100;
 
   class WordElement {
     constructor(word) {
@@ -214,18 +215,29 @@
       this.getApiKey().then(() => {
         this.getLevel().then((level) => {
           this.level = level;
-          this.recursiveVisualisation(this.level);
+          this.makePlaceHolders();
+          for (let i = this.level; i >= this.level - LEVELS_TO_RETRIEVE; i--)
+            setTimeout(() => {
+              this.buildVocab(i).then(() => {
+                this.visualize(this.placeholders[this.level - i]);
+                this.vocabulary = [];
+            });
+          }, i * TIME_INTERVAL);
         });
       });
     }
 
-    recursiveVisualisation(i) {
-      this.buildVocab(i).then(() => {
-        this.visualize();
-        this.vocabulary = [];
-        if (i !== this.level - LEVELS_TO_RETRIEVE)
-          this.recursiveVisualisation(i - 1);
-      });
+    makePlaceHolders() {
+      this.placeholders = [];
+
+      const outerContainer = this.getOuterContainer();
+
+      for (let i = this.level; i >= this.level - LEVELS_TO_RETRIEVE; i--) {
+        let placeholder = document.createElement('div');
+        this.placeholders.push(placeholder);
+
+        outerContainer.appendChild(placeholder);
+      }
     }
 
     getApiKey() {
@@ -355,8 +367,7 @@
       });
     }
 
-    visualize() {
-        const outerContainer = this.getOuterContainer();
+    visualize(outerContainer) {
         const vocabProgress = document.createElement('div');
         vocabProgress.setAttribute('class', 'vocabulary-progress');
 
