@@ -214,14 +214,17 @@
       this.getApiKey().then(() => {
         this.getLevel().then((level) => {
           this.level = level;
-          let levelString = '';
-
-          for(let i = this.level; i >= 0 && i > this.level - LEVELS_TO_RETRIEVE; i--)
-            this.buildVocab(i).then(() => {
-              this.visualize();
-              this.vocabulary = [];
-            });
+          this.recursiveVisualisation(this.level);
         });
+      });
+    }
+
+    recursiveVisualisation(i) {
+      this.buildVocab(i).then(() => {
+        this.visualize();
+        this.vocabulary = [];
+        if (i !== this.level - LEVELS_TO_RETRIEVE)
+          this.recursiveVisualisation(i - 1);
       });
     }
 
